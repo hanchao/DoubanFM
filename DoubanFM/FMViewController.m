@@ -47,11 +47,19 @@
 -(void)initAllValue{
     //初始化所有值
     currentIndex=0;
-    [self.progress setValue:0.0f];
-    [self.sliderVolume setValue:[DOUAudioStreamer volume]];
+    self.progress.currentValue = 0.0f;
+    self.progress.unfilledColor = [UIColor colorWithRed:0.884f green:0.867f blue:0.839f alpha:1];
+    self.progress.filledColor = [UIColor colorWithRed:0.584f green:0.967f blue:0.739f alpha:1];
+    self.progress.handleColor = self.progress.filledColor;
+    self.progress.handleType = EFSemiTransparentWhiteCircle;
+    
+    [self.progress addTarget:self action:@selector(progressAction:) forControlEvents:UIControlEventTouchUpInside];
     
     //设置音乐进度条
     [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(setSliderValue) userInfo:nil repeats:YES];
+    
+    self.songTitle.text = @"加载中...";
+    self.playing.hidden = YES;
     
     //Get、Post参数
     songParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"n",@"type",@"4",@"channel",nil];
@@ -367,9 +375,9 @@
 
 -(void)setSliderValue{
     if (streamer.duration == 0.0) {
-        [self.progress setValue:0.0f animated:NO];
+        self.progress.currentValue = 0.0f;
     }else{
-        [self.progress setValue:[streamer currentTime] / [streamer duration] animated:YES];
+        self.progress.currentValue = [streamer currentTime] / [streamer duration];
     }
 }
 
@@ -406,15 +414,11 @@
 }
 
 - (IBAction)nextAction:(id)sender {
-    [self.unLove setTitle:@"unLove" forState:UIControlStateNormal];
+    self.love.selected = NO;
     if ([self reGetTracks]) {
         currentIndex++;
         [self loadTracks];
     }
-}
-
-- (IBAction)downloadAction:(id)sender {
-
 }
 
 - (IBAction)loveAction:(id)sender {
@@ -429,7 +433,7 @@
     }
     AFHTTPSessionManager *loveManager=[AFHTTPSessionManager manager];
     [loveManager GET:loveURL parameters:loveParameters success:^(NSURLSessionDataTask *task, id responseObject) {
-        [self.unLove setTitle:@"Love" forState:UIControlStateNormal];
+        self.love.selected = YES;
         NSLog(@"Love is success");
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
         NSLog(@"error%@",error);
@@ -437,12 +441,11 @@
     
 }
 
-- (IBAction)progressAction:(id)sender {
-    [self.progress setValue:self.progress.value animated:YES];
-    [streamer setCurrentTime:[streamer duration] * [self.progress value]];
+- (void)progressAction:(id)sender {
+    float dd = self.progress.currentValue;
+    float dd1 = [streamer duration];
+    //[self.progress setValue:self.progress.value animated:YES];
+    [streamer setCurrentTime:[streamer duration] * self.progress.currentValue];
 }
 
-- (IBAction)VolumeAction:(id)sender {
-    [DOUAudioStreamer setVolume:self.sliderVolume.value];
-}
 @end
