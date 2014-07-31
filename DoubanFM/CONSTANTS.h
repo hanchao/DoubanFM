@@ -1,13 +1,13 @@
 //
 //  CONSTANTS.h
-//  FM_ycm
+//  DoubanFM
 //
-//  Created by yangcaimu on 14-2-4.
-//  Copyright (c) 2014年 yangcaimu. All rights reserved.
+//  Created by chao han on 14-2-4.
+//  Copyright (c) 2014年 chao han. All rights reserved.
 //
 
-#ifndef FM_ycm_CONSTANTS_h
-#define FM_ycm_CONSTANTS_h
+#ifndef DoubanFM_CONSTANTS_h
+#define DoubanFM_CONSTANTS_h
 
 
 

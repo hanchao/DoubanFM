@@ -1,9 +1,9 @@
 //
 //  User.h
-//  FM_ycm
+//  DoubanFM
 //
-//  Created by yangcaimu on 14-2-9.
-//  Copyright (c) 2014年 yangcaimu. All rights reserved.
+//  Created by chao han on 14-2-9.
+//  Copyright (c) 2014年 chao han. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

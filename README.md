@@ -15,5 +15,7 @@ Enjoy the music.
 * open ```DoubanFM.xcworkspace``` and run
 
 
+[DoubanFM API](https://github.com/zonyitoo/doubanfm-qt/wiki/豆瓣FM-API")
+
 ## DoubanFM
 DoubanFM is available under the [WTFPL](http://sam.zoy.org/wtfpl/)
