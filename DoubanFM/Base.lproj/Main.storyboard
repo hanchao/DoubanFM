@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="TGi-Az-NwJ">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13E28" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="TGi-Az-NwJ">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3747"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
     </dependencies>
     <scenes>
-        <!--Channels View Controller-->
+        <!--Channels View Controller - Channels-->
         <scene sceneID="P35-ko-LT7">
             <objects>
                 <tableViewController id="p4J-vg-Gnf" customClass="ChannelsViewController" sceneMemberID="viewController">
@@ -14,7 +14,7 @@
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Channels" textLabel="pwg-7L-4hD" style="IBUITableViewCellStyleDefault" id="0ri-l2-xXQ">
-                                <rect key="frame" x="0.0" y="55" width="320" height="44"/>
+                                <rect key="frame" x="0.0" y="119" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="0ri-l2-xXQ" id="6Fj-CN-OEn">
                                     <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
@@ -36,12 +36,13 @@
                             <outlet property="delegate" destination="p4J-vg-Gnf" id="EY4-PE-iVh"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" title="Channels" id="xsf-87-8cE" userLabel="Navigation Item - Channels"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cEA-1e-NTM" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="967" y="-291"/>
         </scene>
-        <!--View Controller - FM_YCM-->
+        <!--View Controller - FM-->
         <scene sceneID="j5S-yp-y1k">
             <objects>
                 <viewController id="EjG-T8-T9B" customClass="FMViewController" sceneMemberID="viewController">
@@ -187,10 +188,10 @@
                             <constraint firstItem="bYY-RH-Qs2" firstAttribute="trailing" secondItem="HLJ-OO-u51" secondAttribute="trailing" id="yTk-Oy-RJ0"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="FM_YCM" id="Jyh-FS-DMf">
+                    <navigationItem key="navigationItem" title="FM" id="Jyh-FS-DMf">
                         <barButtonItem key="leftBarButtonItem" title="Channels" id="ySA-c3-mTN">
                             <connections>
-                                <segue destination="p4J-vg-Gnf" kind="modal" identifier="channels" id="9uf-Qc-BtZ"/>
+                                <segue destination="p4J-vg-Gnf" kind="push" identifier="channels" id="9uf-Qc-BtZ"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="Login" id="oic-oA-hKF">
@@ -213,7 +214,7 @@
             </objects>
             <point key="canvasLocation" x="526" y="109"/>
         </scene>
-        <!--Login View Controller - FM_YCM-->
+        <!--Login View Controller - Login-->
         <scene sceneID="rZY-c8-bTJ">
             <objects>
                 <tableViewController id="L7h-MD-tNU" customClass="LoginViewController" sceneMemberID="viewController">
@@ -345,13 +346,7 @@
                         </connections>
                     </tableView>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" title="FM_YCM" id="TV2-ai-7t9">
-                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="jDP-cs-SVE">
-                            <connections>
-                                <action selector="cancelAction:" destination="L7h-MD-tNU" id="7Q7-SM-zhc"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Login" id="TV2-ai-7t9"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="loginButton" destination="FzJ-ef-76v" id="Ml6-cP-q6g"/>
