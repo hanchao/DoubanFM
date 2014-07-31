@@ -48,12 +48,13 @@
     //初始化所有值
     currentIndex=0;
     self.progress.currentValue = 0.0f;
+    self.progress.minimumValue = 0.0f;
+    self.progress.maximumValue = 1.0f;
     self.progress.unfilledColor = [UIColor colorWithRed:0.884f green:0.867f blue:0.839f alpha:1];
     self.progress.filledColor = [UIColor colorWithRed:0.584f green:0.967f blue:0.739f alpha:1];
     self.progress.handleColor = self.progress.filledColor;
     self.progress.handleType = EFSemiTransparentWhiteCircle;
-    
-    [self.progress addTarget:self action:@selector(progressAction:) forControlEvents:UIControlEventTouchUpInside];
+    self.progress.enabled = NO;
     
     //设置音乐进度条
     [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(setSliderValue) userInfo:nil repeats:YES];
@@ -80,9 +81,7 @@
     self.imageView.layer.cornerRadius = 125;
     
     //歌曲图片增加单击事件
-    UITapGestureRecognizer *singTapShow=[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onClickImageShow)];
-    [self.imageView addGestureRecognizer:singTapShow];
-    UITapGestureRecognizer *singTapHidden=[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onClickImageHidden)];
+    UITapGestureRecognizer *singTapHidden=[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playOrPause)];
     [self.audioVisualizerView addGestureRecognizer:singTapHidden];
     
     //取得上次登陆成功与否
@@ -100,16 +99,6 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-}
-
-#pragma  mark - songImage singTap
-
--(void)onClickImageShow{
-    [self.audioVisualizerView setHidden:NO];
-}
-
--(void)onClickImageHidden{
-    [self.audioVisualizerView setHidden:YES];
 }
 
 #pragma mark - Tracks methods
@@ -407,13 +396,7 @@
  DOUAudioStreamerError
  */
 - (IBAction)playingAction:(id)sender {
-    if ([streamer status] == DOUAudioStreamerPaused || [streamer status] == DOUAudioStreamerIdle) {
-        [streamer play];
-        [self.playing setTitle:@"Pause" forState:UIControlStateNormal];
-    }else{
-        [streamer pause];
-        [self.playing setTitle:@"play" forState:UIControlStateNormal];
-    }
+    [self playOrPause];
 }
 
 - (IBAction)nextAction:(id)sender {
@@ -444,11 +427,14 @@
     
 }
 
-- (void)progressAction:(id)sender {
-    float dd = self.progress.currentValue;
-    float dd1 = [streamer duration];
-    //[self.progress setValue:self.progress.value animated:YES];
-    [streamer setCurrentTime:[streamer duration] * self.progress.currentValue];
+- (void)playOrPause{
+    if ([streamer status] == DOUAudioStreamerPaused || [streamer status] == DOUAudioStreamerIdle) {
+        [streamer play];
+        self.playing.hidden = YES;
+    }else{
+        [streamer pause];
+        self.playing.hidden = NO;
+    }
 }
 
 @end
