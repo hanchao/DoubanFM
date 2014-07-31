@@ -28,6 +28,7 @@
 @property (strong, nonatomic, readonly) NSManagedObjectModel *managedObjectModel;
 @property (strong, nonatomic, readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
+- (IBAction)menuAction:(id)sender;
 
 - (IBAction)playingAction:(id)sender;
 - (IBAction)nextAction:(id)sender;

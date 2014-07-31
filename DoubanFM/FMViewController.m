@@ -15,6 +15,8 @@
 #import "Channel.h"
 #import "ChannelsViewController.h"
 #import "User.h"
+#import "JASidePanelController.h"
+#import "UIViewController+JASidePanel.h"
 
 @interface FMViewController ()
 
@@ -57,7 +59,7 @@
     self.progress.enabled = NO;
     
     //设置音乐进度条
-    [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(setSliderValue) userInfo:nil repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(setSliderValue) userInfo:nil repeats:YES];
     
     self.songTitle.text = @"加载中...";
     [self.songTitle setNumberOfLines:0];
@@ -184,6 +186,15 @@
             channel.channel_id=[dicChannels objectForKey:@"channel_id"];
             [channels addObject:channel];
         }
+        
+        UIViewController *leftViewController = self.sidePanelController.leftPanel;
+        if ([leftViewController isKindOfClass:[ChannelsViewController class]]){
+            ChannelsViewController *chvc=(ChannelsViewController *)leftViewController;
+            chvc.channels=channels;
+            [chvc.tableView reloadData];
+            chvc.delegate=self;
+        }
+            
         NSLog(@"get Channels success");
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
         NSLog(@"[getChannels]Network connect failure:error--->%@",error);
@@ -197,7 +208,8 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [self getTracks];
     });
-    [self dismissViewControllerAnimated:YES completion:nil];
+    //[self dismissViewControllerAnimated:YES completion:nil];
+    [self.sidePanelController showCenterPanelAnimated:YES];
 }
 
 #pragma mark - Login method
@@ -373,20 +385,14 @@
     }
 }
 
-#pragma mark - segue method
--(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
-    if ([segue.identifier isEqualToString:@"login"]) {
-        LoginViewController *loginvc=(LoginViewController *)segue.destinationViewController;
-        loginvc.delegate=self;
-    }
-    if ([segue.identifier isEqualToString:@"channels"]) {
-        ChannelsViewController *chvc=(ChannelsViewController *)segue.destinationViewController;
-        chvc.channels=channels;
-        chvc.delegate=self;
-    }
-}
+
 
 #pragma mark - action method
+
+- (IBAction)menuAction:(id)sender{
+    [self.sidePanelController showLeftPanelAnimated:YES];
+}
+
 /*
  DOUAudioStreamerPlaying,
  DOUAudioStreamerPaused,
@@ -436,5 +442,21 @@
         self.playing.hidden = NO;
     }
 }
+
+#pragma mark - segue method
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
+    ChannelsViewController *viewController=(ChannelsViewController *)segue.destinationViewController;
+    
+    if ([viewController isKindOfClass:[LoginViewController class]]) {
+        LoginViewController *loginvc=(LoginViewController *)viewController;
+        loginvc.delegate=self;
+    }else if ([viewController isKindOfClass:[ChannelsViewController class]]){
+        ChannelsViewController *chvc=(ChannelsViewController *)viewController;
+        chvc.channels=channels;
+        [chvc.tableView reloadData];
+        chvc.delegate=self;
+    }
+}
+
 
 @end

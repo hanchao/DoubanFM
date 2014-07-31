@@ -40,6 +40,12 @@
     // Dispose of any resources that can be recreated.
 }
 
+//- (void)setChannels:(NSMutableArray *)channels
+//{
+//    self.channels = channels;
+//    self.tableView.reloadData;
+//}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView

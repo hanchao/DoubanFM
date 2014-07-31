@@ -7,7 +7,10 @@
 //
 
 #import "RootViewController.h"
-#import "RESideMenu.h"
+
+#import "FMViewController.h"
+#import "LoginViewController.h"
+#import "ChannelsViewController.h"
 
 @interface RootViewController ()
 
@@ -38,8 +41,16 @@
 
 - (void)awakeFromNib
 {
-    self.contentViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"FMViewController"];
-    self.leftMenuViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"ChannelsViewController"];
-    self.rightMenuViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"LoginViewController"];
+    ChannelsViewController *leftViewController = (ChannelsViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"ChannelsViewController"];
+    UINavigationController *centerViewController = (UINavigationController *)[self.storyboard instantiateViewControllerWithIdentifier:@"CenterViewController"];
+    
+    FMViewController *fmViewController = (FMViewController *)centerViewController.topViewController;
+    
+    leftViewController.delegate = fmViewController;
+
+    
+    [self setLeftPanel:leftViewController];
+    [self setCenterPanel:centerViewController];
+
 }
 @end
