@@ -38,6 +38,7 @@
 		D6737AD5198A3F9E00B9E94B /* trash_can_normal@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6737ACB198A3F9E00B9E94B /* trash_can_normal@2x.png */; };
 		D6737AD6198A3F9E00B9E94B /* unlike.png in Resources */ = {isa = PBXBuildFile; fileRef = D6737ACC198A3F9E00B9E94B /* unlike.png */; };
 		D6737AD7198A3F9E00B9E94B /* unlike@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6737ACD198A3F9E00B9E94B /* unlike@2x.png */; };
+		D6737ADA198A432700B9E94B /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D6737AD9198A432700B9E94B /* RootViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +95,8 @@
 		D6737ACB198A3F9E00B9E94B /* trash_can_normal@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash_can_normal@2x.png"; sourceTree = "<group>"; };
 		D6737ACC198A3F9E00B9E94B /* unlike.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = unlike.png; sourceTree = "<group>"; };
 		D6737ACD198A3F9E00B9E94B /* unlike@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "unlike@2x.png"; sourceTree = "<group>"; };
+		D6737AD8198A432700B9E94B /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
+		D6737AD9198A432700B9E94B /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,6 +170,8 @@
 				D6737A621989E15300B9E94B /* FMViewController.m */,
 				D6737A631989E15300B9E94B /* LoginViewController.h */,
 				D6737A641989E15300B9E94B /* LoginViewController.m */,
+				D6737AD8198A432700B9E94B /* RootViewController.h */,
+				D6737AD9198A432700B9E94B /* RootViewController.m */,
 				D6737A651989E15300B9E94B /* Model.xcdatamodeld */,
 				D6737A671989E15300B9E94B /* Track.h */,
 				D6737A681989E15300B9E94B /* Track.m */,
@@ -372,6 +377,7 @@
 				D6737A6B1989E15300B9E94B /* Channel.m in Sources */,
 				D6737A711989E15300B9E94B /* User.m in Sources */,
 				D6737A6E1989E15300B9E94B /* LoginViewController.m in Sources */,
+				D6737ADA198A432700B9E94B /* RootViewController.m in Sources */,
 				D6737A6F1989E15300B9E94B /* Model.xcdatamodeld in Sources */,
 				D6737A6C1989E15300B9E94B /* ChannelsViewController.m in Sources */,
 				D6737A3A1989E0BD00B9E94B /* main.m in Sources */,

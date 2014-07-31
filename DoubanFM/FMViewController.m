@@ -59,6 +59,9 @@
     [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(setSliderValue) userInfo:nil repeats:YES];
     
     self.songTitle.text = @"加载中...";
+    [self.songTitle setNumberOfLines:0];
+    self.songTitle.lineBreakMode = UILineBreakModeWordWrap;
+    
     self.playing.hidden = YES;
     
     //Get、Post参数
@@ -150,7 +153,7 @@
     streamer=[DOUAudioStreamer streamerWithAudioFile:track];
     [streamer addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
     [self setSliderValue];
-    NSString *title=[NSString stringWithFormat:@"%@--%@",track.title,track.artist];
+    NSString *title=[NSString stringWithFormat:@"%@\n%@",track.title,track.artist];
     [self.songTitle setText:title];
     [self.imageView setImage:[track picture]];
     [streamer play];
