@@ -44,10 +44,6 @@
     self.token = [userDefaults objectForKey:@"token"];
     self.user_name = [userDefaults objectForKey:@"user_name"];
     self.channel_id = [userDefaults objectForKey:@"channel_id"];
-    
-    if (self.channel_id.length == 0) {
-        self.channel_id = @"1";
-    }
 }
 
 @end

@@ -27,8 +27,8 @@
 @implementation FMViewController{
     NSMutableArray *tracks;
     DOUAudioStreamer *streamer;
-    NSInteger currentIndex;
-    Track *track;
+    Track *prevTrack;
+    Track *currentTrack;
     NSMutableArray *channels;
     User *user;
 }
@@ -64,7 +64,9 @@
 
 -(void)initAllValue{
     //初始化所有值
-    currentIndex=0;
+ 
+    tracks=[NSMutableArray array];
+    
     self.progress.currentValue = 0.0f;
     self.progress.minimumValue = 0.0f;
     self.progress.maximumValue = 1.0f;
@@ -104,12 +106,11 @@
         [self loginName:user.email password:user.password];
     }
     
+    //频道列表
+    [self getChannels];
     
-    //获取歌曲列表、频道列表
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [self getTracks];
-        [self getChannels];
-    });
+    //自动播放
+    [self next];
     
     //让app支持接受远程控制事件
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
@@ -125,17 +126,30 @@
 -(void)getTracks{
     NSString *url=@"http://douban.fm/j/app/radio/people";
     AFHTTPSessionManager *manager=[AFHTTPSessionManager manager];
+    
+    if (user.channel_id.length == 0) {
+        user.channel_id = @"1";
+    }
     NSMutableDictionary *songParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"n",@"type",user.channel_id,@"channel",nil];
-    NSLog(@"current channel--->%@",[songParameters objectForKey:@"channel"]);
+    
+    if (prevTrack !=  nil) {
+        [songParameters setObject:@"p" forKey:@"type"];
+        [songParameters setObject:prevTrack.sid forKey:@"sid"];
+    }
+    
+    if (user.isLogin) {
+        [songParameters setObject:user.user_id forKey:@"user_id"];
+        [songParameters setObject:user.expire forKey:@"expire"];
+        [songParameters setObject:user.token forKey:@"token"];
+    }
+    
+    NSLog(@"get new tracks , current channel is %@",[songParameters objectForKey:@"channel"]);
     [manager GET:url parameters:songParameters success:^(NSURLSessionDataTask *task, id responseObject) {
         NSDictionary *responseSongs=[responseObject objectForKey:@"song"];
-        if (tracks != nil) {
-            [tracks removeAllObjects];
-        }
-        tracks=[NSMutableArray array];
+
         for (NSDictionary *song in responseSongs) {
             //依次赋值给track
-            track=[[Track alloc] init];
+            Track *track=[[Track alloc] init];
             track.artist=[song objectForKey:@"artist"];
             track.title=[song objectForKey:@"title"];
             track.albumTitle=[song objectForKey:@"albumtitle"];
@@ -143,56 +157,50 @@
             track.url=[NSURL URLWithString:[song objectForKey:@"url"]];
             track.picture=[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[song objectForKey:@"picture"]]]];
             track.isLike=[[song objectForKey:@"like"] boolValue];
+            
             [tracks addObject:track];
         }
-        int a=0;
-        for (Track *temp in tracks) {
-            a++;
-             NSLog(@"temp[%d]%@",a,temp.title);
+        
+        NSLog(@"get %d tracks",tracks.count);
+
+        //如果当前没歌，自动播放
+        if (currentTrack == nil) {
+            [self playNextTrack];
         }
-        //读取获得的Tracks
-        [self loadTracks];
-         NSLog(@"get Tracks success");
+
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
         NSLog(@"[getTracks]Network connect failure:error--->%@",error);
     }];
 }
 
--(void)loadTracks{
+-(BOOL)playNextTrack{
     [self removeObserverForStreamer];
-    if (currentIndex<0 || currentIndex>=tracks.count) {
-        return;
+    if (tracks.count == 0) {
+        return NO;
     }
-    track=[tracks objectAtIndex:currentIndex];
-    streamer=[DOUAudioStreamer streamerWithAudioFile:track];
+    currentTrack =[tracks firstObject];
+    [tracks removeObject:currentTrack];
+    streamer=[DOUAudioStreamer streamerWithAudioFile:currentTrack];
     [streamer addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
     [self setSliderValue];
-    NSString *title=[NSString stringWithFormat:@"%@\n%@",track.title,track.artist];
+    NSString *title=[NSString stringWithFormat:@"%@\n%@",currentTrack.title,currentTrack.artist];
     [self.songTitle setText:title];
-    self.love.selected = track.isLike;
-    [self.imageView setImage:[track picture]];
+    self.love.selected = currentTrack.isLike;
+    [self.imageView setImage:[currentTrack picture]];
     self.playing.hidden = YES;
     [streamer play];
     
     [self configNowPlayingInfoCenter];
+    
+    NSLog(@"play %@-%@",currentTrack.title,currentTrack.artist);
+    
+    return YES;
 }
 
 -(void)removeObserverForStreamer{
     if (streamer != nil) {
         [streamer removeObserver:self forKeyPath:@"status"];
         streamer=nil;
-    }
-}
-
--(BOOL)reGetTracks{
-    if (currentIndex == [tracks count]-1 ) {
-        currentIndex=0;
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            [self getTracks];
-        });
-        return NO;
-    }else{
-        return YES;
     }
 }
 
@@ -232,13 +240,18 @@
 #pragma mark - ChannelsViewControllerDelegate method
 -(void)ChannelsViewControllerDidSelect:(ChannelsViewController *)controller didChannel:(Channel *)selectChannel{
     NSLog(@"channel_id--->name:%@--->%@",selectChannel.channel_id,selectChannel.name);
-    
+    if (user.channel_id == selectChannel.channel_id) {
+        return;
+    }
     user.channel_id = selectChannel.channel_id;
     [user save];
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [self getTracks];
-    });
+    currentTrack == nil;
+    [tracks removeAllObjects];
+    
+    // 自动播放
+    [self next];
+    
     //[self dismissViewControllerAnimated:YES completion:nil];
     [self.sidePanelController showCenterPanelAnimated:YES];
 }
@@ -306,7 +319,7 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if ([keyPath isEqualToString:@"status"] ) {
         if ([streamer status] == DOUAudioStreamerFinished){
-            [self performSelector:@selector(nextAction:)
+            [self performSelector:@selector(finishAction:)
                          onThread:[NSThread mainThread]
                        withObject:nil
                     waitUntilDone:NO];
@@ -344,51 +357,103 @@
 }
 
 - (IBAction)nextAction:(id)sender {
+
     [self next];
+    
+    //seed skip message
+    if (prevTrack != nil){
+        NSString *skipURL=@"http://douban.fm/j/app/radio/people";
+        NSMutableDictionary *skipParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"s",@"type",@"4",@"channel",nil];
+        [skipParameters setObject:prevTrack.sid forKey:@"sid"];
+        if (user.isLogin) {
+            [skipParameters setObject:user.user_id forKey:@"user_id"];
+            [skipParameters setObject:user.expire forKey:@"expire"];
+            [skipParameters setObject:user.token forKey:@"token"];
+        }
+        AFHTTPSessionManager *skipManager=[AFHTTPSessionManager manager];
+        [skipManager GET:skipURL parameters:skipParameters success:^(NSURLSessionDataTask *task, id responseObject) {
+            NSLog(@"skip is success");
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+            NSLog(@"error%@",error);
+        }];
+    }
+
+}
+
+- (IBAction)finishAction:(id)sender {
+    
+    [self next];
+    
+    //seed end message
+    if (prevTrack != nil){
+        NSString *endURL=@"http://douban.fm/j/app/radio/people";
+        NSMutableDictionary *endParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"s",@"type",@"4",@"channel",nil];
+        [endParameters setObject:prevTrack.sid forKey:@"sid"];
+        if (user.isLogin) {
+            [endParameters setObject:user.user_id forKey:@"user_id"];
+            [endParameters setObject:user.expire forKey:@"expire"];
+            [endParameters setObject:user.token forKey:@"token"];
+        }
+        AFHTTPSessionManager *endManager=[AFHTTPSessionManager manager];
+        [endManager GET:endURL parameters:endParameters success:^(NSURLSessionDataTask *task, id responseObject) {
+            NSLog(@"end is success");
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+            NSLog(@"error%@",error);
+        }];
+    }
 }
 
 - (IBAction)loveAction:(id)sender {
-    NSString *loveURL=@"http://douban.fm/j/app/radio/people";
-    NSMutableDictionary *loveParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"r",@"type",@"4",@"channel",nil];
-    [loveParameters setObject:track.sid forKey:@"sid"];
-    if (user.isLogin) {
-        [loveParameters setObject:user.user_id forKey:@"user_id"];
-        [loveParameters setObject:user.expire forKey:@"expire"];
-        [loveParameters setObject:user.token forKey:@"token"];
-    }
-    AFHTTPSessionManager *loveManager=[AFHTTPSessionManager manager];
-    [loveManager GET:loveURL parameters:loveParameters success:^(NSURLSessionDataTask *task, id responseObject) {
-        self.love.selected = YES;
-        NSLog(@"Love is success");
-    } failure:^(NSURLSessionDataTask *task, NSError *error) {
-        NSLog(@"error%@",error);
-    }];
     
+    if (currentTrack != nil){
+        NSString *loveURL=@"http://douban.fm/j/app/radio/people";
+        NSMutableDictionary *loveParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"r",@"type",@"4",@"channel",nil];
+        [loveParameters setObject:currentTrack.sid forKey:@"sid"];
+        if (user.isLogin) {
+            [loveParameters setObject:user.user_id forKey:@"user_id"];
+            [loveParameters setObject:user.expire forKey:@"expire"];
+            [loveParameters setObject:user.token forKey:@"token"];
+        }
+        AFHTTPSessionManager *loveManager=[AFHTTPSessionManager manager];
+        [loveManager GET:loveURL parameters:loveParameters success:^(NSURLSessionDataTask *task, id responseObject) {
+            self.love.selected = YES;
+            NSLog(@"Love is success");
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+            NSLog(@"error%@",error);
+        }];
+    }
 }
 
 - (IBAction)trashAction:(id)sender {
-    NSString *trashURL=@"http://douban.fm/j/app/radio/people";
-    NSMutableDictionary *trashParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"b",@"type",@"4",@"channel",nil];
-    [trashParameters setObject:track.sid forKey:@"sid"];
-    if (user.isLogin) {
-        [trashParameters setObject:user.user_id forKey:@"user_id"];
-        [trashParameters setObject:user.expire forKey:@"expire"];
-        [trashParameters setObject:user.token forKey:@"token"];
+    if (currentTrack != nil) {
+        NSString *trashURL=@"http://douban.fm/j/app/radio/people";
+        NSMutableDictionary *trashParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"b",@"type",@"4",@"channel",nil];
+        [trashParameters setObject:currentTrack.sid forKey:@"sid"];
+        if (user.isLogin) {
+            [trashParameters setObject:user.user_id forKey:@"user_id"];
+            [trashParameters setObject:user.expire forKey:@"expire"];
+            [trashParameters setObject:user.token forKey:@"token"];
+        }
+        AFHTTPSessionManager *trashManager=[AFHTTPSessionManager manager];
+        [trashManager GET:trashURL parameters:trashParameters success:^(NSURLSessionDataTask *task, id responseObject) {
+            [self next];
+            NSLog(@"trash is success");
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+            NSLog(@"error%@",error);
+        }];
     }
-    AFHTTPSessionManager *trashManager=[AFHTTPSessionManager manager];
-    [trashManager GET:trashURL parameters:trashParameters success:^(NSURLSessionDataTask *task, id responseObject) {
-        [self next];
-        NSLog(@"trash is success");
-    } failure:^(NSURLSessionDataTask *task, NSError *error) {
-        NSLog(@"error%@",error);
-    }];
 }
 
 - (void)next{
     self.love.selected = NO;
-    if ([self reGetTracks]) {
-        currentIndex++;
-        [self loadTracks];
+    
+    prevTrack = currentTrack;
+    currentTrack = nil;
+
+    if(![self playNextTrack])
+    {
+        // 没有歌了，加载新的吧
+        [self getTracks];
     }
 }
 
@@ -444,12 +509,12 @@
     if (playingInfoCenter) {
         NSMutableDictionary *songInfo = [ [NSMutableDictionary alloc] init];
         
-        if(track != nil){
-            MPMediaItemArtwork *albumArt = [ [MPMediaItemArtwork alloc] initWithImage: [track picture] ];
+        if(currentTrack != nil){
+            MPMediaItemArtwork *albumArt = [ [MPMediaItemArtwork alloc] initWithImage: [currentTrack picture] ];
             
-            [ songInfo setObject: track.title forKey:MPMediaItemPropertyTitle ];
-            [ songInfo setObject: track.artist forKey:MPMediaItemPropertyArtist ];
-            [ songInfo setObject: track.albumTitle forKey:MPMediaItemPropertyAlbumTitle ];
+            [ songInfo setObject: currentTrack.title forKey:MPMediaItemPropertyTitle ];
+            [ songInfo setObject: currentTrack.artist forKey:MPMediaItemPropertyArtist ];
+            [ songInfo setObject: currentTrack.albumTitle forKey:MPMediaItemPropertyAlbumTitle ];
             [ songInfo setObject: albumArt forKey:MPMediaItemPropertyArtwork ];
             
             [songInfo setObject:[NSNumber numberWithDouble:[streamer duration]] forKey:MPMediaItemPropertyPlaybackDuration];
