@@ -240,17 +240,18 @@
 #pragma mark - ChannelsViewControllerDelegate method
 -(void)ChannelsViewControllerDidSelect:(ChannelsViewController *)controller didChannel:(Channel *)selectChannel{
     NSLog(@"channel_id--->name:%@--->%@",selectChannel.channel_id,selectChannel.name);
-    if (user.channel_id == selectChannel.channel_id) {
-        return;
+    if (user.channel_id != selectChannel.channel_id) {
+        user.channel_id = selectChannel.channel_id;
+        [user save];
+        
+        prevTrack = nil;
+        currentTrack = nil;
+        
+        [tracks removeAllObjects];
+        
+        // 自动播放
+        [self next];
     }
-    user.channel_id = selectChannel.channel_id;
-    [user save];
-    
-    currentTrack == nil;
-    [tracks removeAllObjects];
-    
-    // 自动播放
-    [self next];
     
     //[self dismissViewControllerAnimated:YES completion:nil];
     [self.sidePanelController showCenterPanelAnimated:YES];
