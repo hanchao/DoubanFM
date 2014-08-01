@@ -102,6 +102,10 @@
     self.imageView.layer.masksToBounds = YES;
     self.imageView.layer.cornerRadius = 125;
     
+    self.playing.backgroundColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.5f];
+    self.playing.layer.masksToBounds = YES;
+    self.playing.layer.cornerRadius = 20;
+    
     //歌曲图片增加单击事件
     UITapGestureRecognizer *singTapHidden=[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playOrPause)];
     [self.audioVisualizerView addGestureRecognizer:singTapHidden];
@@ -116,11 +120,6 @@
         }
         [self getLogin:nil];
     }
-    
-//    //后台播放音频设置
-//    AVAudioSession *session = [AVAudioSession sharedInstance];
-//    [session setActive:YES error:nil];
-//    [session setCategory:AVAudioSessionCategoryPlayback error:nil];
     
     //让app支持接受远程控制事件
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
@@ -178,6 +177,7 @@
     [self.songTitle setText:title];
     self.love.selected = track.isLike;
     [self.imageView setImage:[track picture]];
+    self.playing.hidden = YES;
     [streamer play];
     
     [self configNowPlayingInfoCenter];
@@ -269,10 +269,8 @@
             //登陆失败
             [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"isLogin"];
             [self deleteCoreData];
-            UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Login failure" message:[NSString stringWithFormat:@"%@",[loginMess objectForKey:@"err"]] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+            UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"登入失败" message:[NSString stringWithFormat:@"%@",[loginMess objectForKey:@"err"]] delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
             [alert show];
-            [controller.nameText setText:@""];
-            [controller.passwordText setText:@""];
             NSLog(@"login failure");
         }
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
@@ -294,7 +292,7 @@
         [loginParameters setObject:controller.passwordText.text forKey:@"password"];
         [self getLogin:controller];
     }else{
-        UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Login failure" message:@"Please enter the email address and password" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"登入失败" message:@"请输入邮件和密码" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
         [alert show];
     }
 }

@@ -59,7 +59,7 @@
 }
 
 - (IBAction)loginAction:(id)sender {
-    //[self.delegate loginViewControllerDidSave:self];
+    [self.delegate loginViewControllerDidSave:self];
 }
 
 - (IBAction)TextField_DidEndOnExit:(UITextField *)sender{
