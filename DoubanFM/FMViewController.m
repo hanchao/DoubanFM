@@ -17,6 +17,8 @@
 #import "User.h"
 #import "JASidePanelController.h"
 #import "UIViewController+JASidePanel.h"
+#import <MediaPlayer/MPNowPlayingInfoCenter.h>
+#import <MediaPlayer/MPMediaItem.h>
 
 @interface FMViewController ()
 
@@ -45,6 +47,24 @@
     [self initAllValue];
 }
 
+- (void) viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
+    [self becomeFirstResponder];
+}
+
+- (void) viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
+    [self resignFirstResponder];
+}
+
+- (BOOL)canBecomeFirstResponder
+{
+    return YES;
+}
 
 -(void)initAllValue{
     //初始化所有值
@@ -96,6 +116,14 @@
         }
         [self getLogin:nil];
     }
+    
+//    //后台播放音频设置
+//    AVAudioSession *session = [AVAudioSession sharedInstance];
+//    [session setActive:YES error:nil];
+//    [session setCategory:AVAudioSessionCategoryPlayback error:nil];
+    
+    //让app支持接受远程控制事件
+    [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
 }
 
 - (void)didReceiveMemoryWarning
@@ -120,6 +148,7 @@
             track=[[Track alloc] init];
             track.artist=[song objectForKey:@"artist"];
             track.title=[song objectForKey:@"title"];
+            track.albumTitle=[song objectForKey:@"albumtitle"];
             track.sid=[song objectForKey:@"sid"];
             track.url=[NSURL URLWithString:[song objectForKey:@"url"]];
             track.picture=[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[song objectForKey:@"picture"]]]];
@@ -150,6 +179,8 @@
     self.love.selected = track.isLike;
     [self.imageView setImage:[track picture]];
     [streamer play];
+    
+    [self configNowPlayingInfoCenter];
 }
 
 -(void)removeObserverForStreamer{
@@ -385,6 +416,7 @@
     }else{
         self.progress.currentValue = [streamer currentTime] / [streamer duration];
     }
+    [self configNowPlayingInfoCenter];
 }
 
 
@@ -483,5 +515,47 @@
     }
 }
 
+- (void) remoteControlReceivedWithEvent: (UIEvent *) receivedEvent {
+    if (receivedEvent.type == UIEventTypeRemoteControl) {
+        
+        switch (receivedEvent.subtype) {
+                
+            case UIEventSubtypeRemoteControlPlay:
+            case UIEventSubtypeRemoteControlPause:
+            case UIEventSubtypeRemoteControlTogglePlayPause:
+                [self playOrPause];
+                break;
+                
+            case UIEventSubtypeRemoteControlNextTrack:
+                [self next];
+                break;
+                
+            default:
+                break;
+        }
+    }
+}
+
+- (void) configNowPlayingInfoCenter{
+    // 更新锁屏信息
+    Class playingInfoCenter = NSClassFromString(@"MPNowPlayingInfoCenter");
+    if (playingInfoCenter) {
+        NSMutableDictionary *songInfo = [ [NSMutableDictionary alloc] init];
+        
+        if(track != nil){
+            MPMediaItemArtwork *albumArt = [ [MPMediaItemArtwork alloc] initWithImage: [track picture] ];
+            
+            [ songInfo setObject: track.title forKey:MPMediaItemPropertyTitle ];
+            [ songInfo setObject: track.artist forKey:MPMediaItemPropertyArtist ];
+            [ songInfo setObject: track.albumTitle forKey:MPMediaItemPropertyAlbumTitle ];
+            [ songInfo setObject: albumArt forKey:MPMediaItemPropertyArtwork ];
+            
+            [songInfo setObject:[NSNumber numberWithDouble:[streamer duration]] forKey:MPMediaItemPropertyPlaybackDuration];
+            [songInfo setObject:[NSNumber numberWithDouble:[streamer currentTime]] forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+            
+            [ [MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:songInfo ];
+        }
+    }
+}
 
 @end

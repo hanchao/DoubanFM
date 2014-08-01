@@ -13,6 +13,7 @@
 
 @property (nonatomic,strong) NSString *artist;
 @property (nonatomic,strong) NSString *title;
+@property (nonatomic,strong) NSString *albumTitle;
 @property (nonatomic,strong) NSString *sid;
 @property (nonatomic,strong) NSURL *url;
 @property (nonatomic,strong) UIImage *picture;
