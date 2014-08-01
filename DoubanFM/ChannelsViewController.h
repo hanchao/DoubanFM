@@ -20,6 +20,5 @@
 
 @property (nonatomic,strong) id <ChannelsViewControllerDelegate> delegate;
 @property (nonatomic,strong) NSMutableArray *channels;
-@property (nonatomic,strong) Channel *channel;
 
 @end

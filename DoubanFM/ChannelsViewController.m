@@ -8,6 +8,7 @@
 
 #import "ChannelsViewController.h"
 #import "Channel.h"
+#import "User.h"
 
 @interface ChannelsViewController ()
 
@@ -54,6 +55,10 @@
     return 1;
 }
 
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+    return @"频道";
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
@@ -63,15 +68,27 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {   
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Channels"];
-    self.channel=[self.channels objectAtIndex:indexPath.row];
-    cell.textLabel.text=self.channel.name;
+    Channel *channel=[self.channels objectAtIndex:indexPath.row];
+    cell.textLabel.text=channel.name;
+    
+    //cell.frame = CGRectMake(0,0,40,40);
+    
+    if ([channel.channel_id isEqualToString:[User sharedUser].channel_id])
+    {
+        cell.backgroundColor = [UIColor colorWithRed:0.684f green:0.867f blue:0.739f alpha:1];
+    }
+    else
+    {
+        cell.backgroundColor = [UIColor whiteColor];
+    }
     return cell;
 }
 
 #pragma mark - UITableViewDelegate method
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    self.channel=[self.channels objectAtIndex:indexPath.row];
-    [self.delegate ChannelsViewControllerDidSelect:self didChannel:self.channel];
+    Channel *channel=[self.channels objectAtIndex:indexPath.row];
+    [self.delegate ChannelsViewControllerDidSelect:self didChannel:channel];
+    [self.tableView reloadData];
 }
 
 @end

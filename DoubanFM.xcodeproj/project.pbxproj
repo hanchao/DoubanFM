@@ -24,7 +24,6 @@
 		D6737A6C1989E15300B9E94B /* ChannelsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D6737A5F1989E15300B9E94B /* ChannelsViewController.m */; };
 		D6737A6D1989E15300B9E94B /* FMViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D6737A621989E15300B9E94B /* FMViewController.m */; };
 		D6737A6E1989E15300B9E94B /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D6737A641989E15300B9E94B /* LoginViewController.m */; };
-		D6737A6F1989E15300B9E94B /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D6737A651989E15300B9E94B /* Model.xcdatamodeld */; };
 		D6737A701989E15300B9E94B /* Track.m in Sources */ = {isa = PBXBuildFile; fileRef = D6737A681989E15300B9E94B /* Track.m */; };
 		D6737A711989E15300B9E94B /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = D6737A6A1989E15300B9E94B /* User.m */; };
 		D6737A741989E16400B9E94B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D6737A721989E16400B9E94B /* Main.storyboard */; };
@@ -83,7 +82,6 @@
 		D6737A621989E15300B9E94B /* FMViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMViewController.m; sourceTree = "<group>"; };
 		D6737A631989E15300B9E94B /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		D6737A641989E15300B9E94B /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
-		D6737A661989E15300B9E94B /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		D6737A671989E15300B9E94B /* Track.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Track.h; sourceTree = "<group>"; };
 		D6737A681989E15300B9E94B /* Track.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Track.m; sourceTree = "<group>"; };
 		D6737A691989E15300B9E94B /* User.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = User.h; sourceTree = "<group>"; };
@@ -180,7 +178,6 @@
 				D6737A641989E15300B9E94B /* LoginViewController.m */,
 				D6737AD8198A432700B9E94B /* RootViewController.h */,
 				D6737AD9198A432700B9E94B /* RootViewController.m */,
-				D6737A651989E15300B9E94B /* Model.xcdatamodeld */,
 				D6737A671989E15300B9E94B /* Track.h */,
 				D6737A681989E15300B9E94B /* Track.m */,
 				D6737A691989E15300B9E94B /* User.h */,
@@ -401,7 +398,6 @@
 				D6737A711989E15300B9E94B /* User.m in Sources */,
 				D6737A6E1989E15300B9E94B /* LoginViewController.m in Sources */,
 				D6737ADA198A432700B9E94B /* RootViewController.m in Sources */,
-				D6737A6F1989E15300B9E94B /* Model.xcdatamodeld in Sources */,
 				D6737A6C1989E15300B9E94B /* ChannelsViewController.m in Sources */,
 				D6737A3A1989E0BD00B9E94B /* main.m in Sources */,
 				D6737A6D1989E15300B9E94B /* FMViewController.m in Sources */,
@@ -626,19 +622,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		D6737A651989E15300B9E94B /* Model.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				D6737A661989E15300B9E94B /* Model.xcdatamodel */,
-			);
-			currentVersion = D6737A661989E15300B9E94B /* Model.xcdatamodel */;
-			path = Model.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = D6737A221989E0BD00B9E94B /* Project object */;
 }

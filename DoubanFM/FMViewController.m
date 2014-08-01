@@ -30,11 +30,7 @@
     NSInteger currentIndex;
     Track *track;
     NSMutableArray *channels;
-    Channel *channel;
-    NSMutableDictionary *songParameters;
-    NSMutableDictionary *loginParameters;
-    NSDictionary *loginMess;
-    BOOL isLogin;
+    User *user;
 }
 
 @synthesize managedObjectContext =__managedObjectContext;
@@ -79,24 +75,13 @@
     self.progress.enabled = NO;
     
     //设置音乐进度条
-    [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(setSliderValue) userInfo:nil repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:0.5f target:self selector:@selector(setSliderValue) userInfo:nil repeats:YES];
     
     self.songTitle.text = @"加载中...";
     [self.songTitle setNumberOfLines:0];
     self.songTitle.lineBreakMode = UILineBreakModeWordWrap;
     
     self.playing.hidden = YES;
-    
-    //Get、Post参数
-    songParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"n",@"type",@"4",@"channel",nil];
-    loginParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name",
-        @"100",@"version", nil];
-    
-    //获取歌曲列表、频道列表
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [self getTracks];
-        [self getChannels];
-    });
     
     //歌曲图片以圆形呈现
     self.imageView.layer.masksToBounds = YES;
@@ -110,16 +95,21 @@
     UITapGestureRecognizer *singTapHidden=[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playOrPause)];
     [self.audioVisualizerView addGestureRecognizer:singTapHidden];
     
-    //取得上次登陆成功与否
-    isLogin = [[NSUserDefaults standardUserDefaults] boolForKey:@"isLogin"];
-    if (isLogin) {
-        NSArray *fetchedObjects = [self userDataFetchRequest];
-        for (User *user in fetchedObjects) {
-            [loginParameters setObject:user.email forKey:@"email"];
-            [loginParameters setObject:user.password forKey:@"password"];
-        }
-        [self getLogin:nil];
+    //获取用户信息
+    user = [User sharedUser];
+    [self.navigationItem setTitle:user.user_name];
+    
+    //重新登陆
+    if (user.email.length != 0 && user.password.length != 0) {
+        [self loginName:user.email password:user.password];
     }
+    
+    
+    //获取歌曲列表、频道列表
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [self getTracks];
+        [self getChannels];
+    });
     
     //让app支持接受远程控制事件
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
@@ -135,6 +125,7 @@
 -(void)getTracks{
     NSString *url=@"http://douban.fm/j/app/radio/people";
     AFHTTPSessionManager *manager=[AFHTTPSessionManager manager];
+    NSMutableDictionary *songParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"n",@"type",user.channel_id,@"channel",nil];
     NSLog(@"current channel--->%@",[songParameters objectForKey:@"channel"]);
     [manager GET:url parameters:songParameters success:^(NSURLSessionDataTask *task, id responseObject) {
         NSDictionary *responseSongs=[responseObject objectForKey:@"song"];
@@ -169,6 +160,9 @@
 
 -(void)loadTracks{
     [self removeObserverForStreamer];
+    if (currentIndex<0 || currentIndex>=tracks.count) {
+        return;
+    }
     track=[tracks objectAtIndex:currentIndex];
     streamer=[DOUAudioStreamer streamerWithAudioFile:track];
     [streamer addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
@@ -214,9 +208,10 @@
         channels=[NSMutableArray array];
         for (NSDictionary *dicChannels in responseChannels) {
             //依次赋值给channel
-            channel=[[Channel alloc] init];
+            Channel *channel=[[Channel alloc] init];
             channel.name=[dicChannels objectForKey:@"name"];
-            channel.channel_id=[dicChannels objectForKey:@"channel_id"];
+            NSInteger channel_id = [[dicChannels objectForKey:@"channel_id"] intValue];
+            channel.channel_id = [NSString stringWithFormat:@"%d",channel_id];
             [channels addObject:channel];
         }
         
@@ -237,7 +232,10 @@
 #pragma mark - ChannelsViewControllerDelegate method
 -(void)ChannelsViewControllerDidSelect:(ChannelsViewController *)controller didChannel:(Channel *)selectChannel{
     NSLog(@"channel_id--->name:%@--->%@",selectChannel.channel_id,selectChannel.name);
-    [songParameters setValue:selectChannel.channel_id forKey:@"channel"];
+    
+    user.channel_id = selectChannel.channel_id;
+    [user save];
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [self getTracks];
     });
@@ -246,36 +244,44 @@
 }
 
 #pragma mark - Login method
--(void)getLogin:(LoginViewController *)controller{
+-(void)loginName:(NSString *)name password:(NSString *)password{
     
     NSString *url=@"http://www.douban.com/j/app/login";
     AFHTTPSessionManager *manager=[AFHTTPSessionManager manager];
+    NSMutableDictionary *loginParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name",
+                     @"100",@"version",name,@"email",password,@"password",nil];
+    
     [manager POST:url parameters:loginParameters success:^(NSURLSessionDataTask *task, id responseObject) {
-        loginMess=(NSDictionary *)responseObject;
+        NSDictionary *loginMess=(NSDictionary *)responseObject;
         
         if ( [[[loginMess objectForKey:@"r"] stringValue] isEqualToString:@"0"] ) {
             //登陆成功
-            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"isLogin"];
-            [songParameters setObject:[loginMess objectForKey:@"user_id"] forKey:@"user_id"];
-            [songParameters setObject:[loginMess objectForKey:@"expire"] forKey:@"expire"];
-            [songParameters setObject:[loginMess objectForKey:@"token"] forKey:@"token"];
-            [self.navigationItem setTitle:[loginMess objectForKey:@"user_name"]];
-            [self deleteCoreData];
-            [self insertCoreData];
+            user.isLogin = YES;
+            user.email = name;
+            user.password = password;
+            
+            user.user_id = [loginMess objectForKey:@"user_id"];
+            user.expire = [loginMess objectForKey:@"expire"];
+            user.token = [loginMess objectForKey:@"token"];
+            user.user_name = [loginMess objectForKey:@"user_name"];
+            [user save];
+            
+            [self.navigationItem setTitle:user.user_name];
+
             [self.navigationController popViewControllerAnimated:YES];
             NSLog(@"login success");
             
         }else if ( [[[loginMess objectForKey:@"r"] stringValue] isEqualToString:@"1"] ){
             //登陆失败
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"isLogin"];
-            [self deleteCoreData];
+            user.isLogin = NO;
+
             UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"登入失败" message:[NSString stringWithFormat:@"%@",[loginMess objectForKey:@"err"]] delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
             [alert show];
             NSLog(@"login failure");
         }
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
         //网络连接失败
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"isLogin"];
+        user.isLogin = NO;
         NSLog(@"[getLogin]Network connect failure:error--->%@",error);
     }];
 }
@@ -288,111 +294,11 @@
 
 -(void)loginViewControllerDidSave:(LoginViewController *)controller{
     if (controller.nameText.text.length != 0 && controller.passwordText.text.length != 0) {
-        [loginParameters setObject:controller.nameText.text forKey:@"email"];
-        [loginParameters setObject:controller.passwordText.text forKey:@"password"];
-        [self getLogin:controller];
+        [self loginName:controller.nameText.text password:controller.passwordText.text];
     }else{
         UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"登入失败" message:@"请输入邮件和密码" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
         [alert show];
     }
-}
-
-#pragma mark - CoreData store
-//- (void)saveContext{
-//    NSLog(@"method[saveContext] is called");
-//    NSError *error=nil;
-//    NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
-//    if (managedObjectContext != nil) {
-//        if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
-//            NSLog(@"Unresolved error %@, %@",error,[error userInfo]);
-//            abort();
-//        }
-//    }
-//}
-
-- (NSURL *)applicationDocumentsDirectory{
-    return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
-}
-
-- (NSManagedObjectContext *)managedObjectContext{
-    if (__managedObjectContext != nil) {
-        return __managedObjectContext;
-    }
-    NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
-    if (coordinator != nil) {
-        __managedObjectContext = [[NSManagedObjectContext alloc] init];
-        [__managedObjectContext setPersistentStoreCoordinator:coordinator];
-    }
-    return __managedObjectContext;
-}
-
-- (NSManagedObjectModel *) managedObjectModel{
-    if (__managedObjectModel != nil) {
-        return __managedObjectModel;
-    }
-    NSURL *modeURL = [[NSBundle mainBundle] URLForResource:@"Model" withExtension:@"momd"];
-    __managedObjectModel=[[NSManagedObjectModel alloc] initWithContentsOfURL:modeURL];
-    return __managedObjectModel;
-}
-
-- (NSPersistentStoreCoordinator *)persistentStoreCoordinator{
-    if (__persistentStoreCoordinator != nil) {
-        return __persistentStoreCoordinator;
-    }
-    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Model.sqlite"];
-    NSError *error;
-    __persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
-    if (![__persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error]) {
-        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-        abort();
-    }
-    return __persistentStoreCoordinator;
-}
-
-- (void)insertCoreData{
-    NSManagedObjectContext *context = [self managedObjectContext];
-    User *user=[NSEntityDescription insertNewObjectForEntityForName:@"User" inManagedObjectContext:context];
-    if ( [[loginParameters objectForKey:@"email"] length] != 0 && [[loginParameters objectForKey:@"password"] length] != 0) {
-        user.email=[loginParameters objectForKey:@"email"];
-        user.password=[loginParameters objectForKey:@"password"];
-        NSError *error;
-        if (![context save:&error]) {
-            NSLog(@"不能保存：%@",[error localizedDescription]);
-        }
-    }
-}
-
-- (void)deleteCoreData{
-    NSError *error;
-    NSManagedObjectContext *context = [self managedObjectContext];
-    NSArray *fetchedObjects = [self userDataFetchRequest];
-    if ( fetchedObjects != nil) {
-        for (User *user in fetchedObjects) {
-            for (NSManagedObject *obj in fetchedObjects) {
-                [context deleteObject:obj];
-            }
-            if (![context save:&error]) {
-                NSLog(@"error:%@",error);
-            }
-        }
-    }
-}
-
-- (NSArray *)userDataFetchRequest{
-    NSManagedObjectContext *context = [self managedObjectContext];
-    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"User" inManagedObjectContext:context];
-    [fetchRequest setEntity:entity];
-    NSError *error;
-    NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
-    if ( fetchedObjects != nil ) {
-        NSLog(@"[fetchedObjects count]--->%d",[fetchedObjects count]);
-        for (User *user in fetchedObjects) {
-            [loginParameters setObject:user.email forKey:@"email"];
-            [loginParameters setObject:user.password forKey:@"password"];
-        }
-    }
-    return fetchedObjects;
 }
 
 #pragma mark - KVO delegate method
@@ -443,13 +349,12 @@
 
 - (IBAction)loveAction:(id)sender {
     NSString *loveURL=@"http://douban.fm/j/app/radio/people";
-    NSMutableDictionary *loveParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"n",@"type",@"4",@"channel",nil];
-    [loveParameters setObject:@"r" forKey:@"type"];
+    NSMutableDictionary *loveParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"r",@"type",@"4",@"channel",nil];
     [loveParameters setObject:track.sid forKey:@"sid"];
-    if (loginMess != nil) {
-        [loveParameters setObject:[loginMess objectForKey:@"user_id"] forKey:@"user_id"];
-        [loveParameters setObject:[loginMess objectForKey:@"expire"] forKey:@"expire"];
-        [loveParameters setObject:[loginMess objectForKey:@"token"] forKey:@"token"];
+    if (user.isLogin) {
+        [loveParameters setObject:user.user_id forKey:@"user_id"];
+        [loveParameters setObject:user.expire forKey:@"expire"];
+        [loveParameters setObject:user.token forKey:@"token"];
     }
     AFHTTPSessionManager *loveManager=[AFHTTPSessionManager manager];
     [loveManager GET:loveURL parameters:loveParameters success:^(NSURLSessionDataTask *task, id responseObject) {
@@ -463,13 +368,12 @@
 
 - (IBAction)trashAction:(id)sender {
     NSString *trashURL=@"http://douban.fm/j/app/radio/people";
-    NSMutableDictionary *trashParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"n",@"type",@"4",@"channel",nil];
-    [trashParameters setObject:@"b" forKey:@"type"];
+    NSMutableDictionary *trashParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"b",@"type",@"4",@"channel",nil];
     [trashParameters setObject:track.sid forKey:@"sid"];
-    if (loginMess != nil) {
-        [trashParameters setObject:[loginMess objectForKey:@"user_id"] forKey:@"user_id"];
-        [trashParameters setObject:[loginMess objectForKey:@"expire"] forKey:@"expire"];
-        [trashParameters setObject:[loginMess objectForKey:@"token"] forKey:@"token"];
+    if (user.isLogin) {
+        [trashParameters setObject:user.user_id forKey:@"user_id"];
+        [trashParameters setObject:user.expire forKey:@"expire"];
+        [trashParameters setObject:user.token forKey:@"token"];
     }
     AFHTTPSessionManager *trashManager=[AFHTTPSessionManager manager];
     [trashManager GET:trashURL parameters:trashParameters success:^(NSURLSessionDataTask *task, id responseObject) {
