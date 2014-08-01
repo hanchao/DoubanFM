@@ -292,6 +292,13 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "chao han";
 				TargetAttributes = {
+					D6737A291989E0BD00B9E94B = {
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
+					};
 					D6737A441989E0BD00B9E94B = {
 						TestTargetID = D6737A291989E0BD00B9E94B;
 					};
@@ -527,6 +534,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DoubanFM/DoubanFM-Prefix.pch";
 				INFOPLIST_FILE = "DoubanFM/DoubanFM-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -541,6 +549,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DoubanFM/DoubanFM-Prefix.pch";
 				INFOPLIST_FILE = "DoubanFM/DoubanFM-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

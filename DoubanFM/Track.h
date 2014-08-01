@@ -16,5 +16,6 @@
 @property (nonatomic,strong) NSString *sid;
 @property (nonatomic,strong) NSURL *url;
 @property (nonatomic,strong) UIImage *picture;
+@property (nonatomic) BOOL isLike;
 
 @end

@@ -123,6 +123,7 @@
             track.sid=[song objectForKey:@"sid"];
             track.url=[NSURL URLWithString:[song objectForKey:@"url"]];
             track.picture=[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[song objectForKey:@"picture"]]]];
+            track.isLike=[[song objectForKey:@"like"] boolValue];
             [tracks addObject:track];
         }
         int a=0;
@@ -146,6 +147,7 @@
     [self setSliderValue];
     NSString *title=[NSString stringWithFormat:@"%@\n%@",track.title,track.artist];
     [self.songTitle setText:title];
+    self.love.selected = track.isLike;
     [self.imageView setImage:[track picture]];
     [streamer play];
 }
@@ -406,11 +408,7 @@
 }
 
 - (IBAction)nextAction:(id)sender {
-    self.love.selected = NO;
-    if ([self reGetTracks]) {
-        currentIndex++;
-        [self loadTracks];
-    }
+    [self next];
 }
 
 - (IBAction)loveAction:(id)sender {
@@ -431,6 +429,33 @@
         NSLog(@"error%@",error);
     }];
     
+}
+
+- (IBAction)trashAction:(id)sender {
+    NSString *trashURL=@"http://douban.fm/j/app/radio/people";
+    NSMutableDictionary *trashParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name", @"100",@"version",@"n",@"type",@"4",@"channel",nil];
+    [trashParameters setObject:@"b" forKey:@"type"];
+    [trashParameters setObject:track.sid forKey:@"sid"];
+    if (loginMess != nil) {
+        [trashParameters setObject:[loginMess objectForKey:@"user_id"] forKey:@"user_id"];
+        [trashParameters setObject:[loginMess objectForKey:@"expire"] forKey:@"expire"];
+        [trashParameters setObject:[loginMess objectForKey:@"token"] forKey:@"token"];
+    }
+    AFHTTPSessionManager *trashManager=[AFHTTPSessionManager manager];
+    [trashManager GET:trashURL parameters:trashParameters success:^(NSURLSessionDataTask *task, id responseObject) {
+        [self next];
+        NSLog(@"trash is success");
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        NSLog(@"error%@",error);
+    }];
+}
+
+- (void)next{
+    self.love.selected = NO;
+    if ([self reGetTracks]) {
+        currentIndex++;
+        [self loadTracks];
+    }
 }
 
 - (void)playOrPause{

@@ -33,6 +33,7 @@
 - (IBAction)playingAction:(id)sender;
 - (IBAction)nextAction:(id)sender;
 - (IBAction)loveAction:(id)sender;
+- (IBAction)trashAction:(id)sender;
 
 - (NSURL *)applicationDocumentsDirectory;
 
