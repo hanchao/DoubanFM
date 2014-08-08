@@ -212,7 +212,7 @@
             </objects>
             <point key="canvasLocation" x="450" y="109"/>
         </scene>
-        <!--Login View Controller - 登入-->
+        <!--Login View Controller - 登入豆瓣-->
         <scene sceneID="rZY-c8-bTJ">
             <objects>
                 <tableViewController storyboardIdentifier="LoginViewController" id="L7h-MD-tNU" customClass="LoginViewController" sceneMemberID="viewController">
@@ -344,7 +344,7 @@
                         </connections>
                     </tableView>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" title="登入" id="TV2-ai-7t9"/>
+                    <navigationItem key="navigationItem" title="登入豆瓣" id="TV2-ai-7t9"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="loginButton" destination="FzJ-ef-76v" id="Ml6-cP-q6g"/>

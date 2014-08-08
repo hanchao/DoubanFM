@@ -12,7 +12,7 @@
 #import "DACircularProgressView.h"
 #import "DOUAudioVisualizer.h"
 
-@interface FMViewController : UIViewController<LoginViewControllerDelegate,ChannelsViewControllerDelegate>
+@interface FMViewController : UIViewController<ChannelsViewControllerDelegate>
 
 //控件
 @property (strong, nonatomic) IBOutlet UIImageView *imageView;

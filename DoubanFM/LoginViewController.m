@@ -7,13 +7,17 @@
 //
 
 #import "LoginViewController.h"
+#import "User.h"
+#import "MBProgressHUD.h"
+#import "AFNetworking.h"
 
 @interface LoginViewController ()
 
 @end
 
 @implementation LoginViewController{
-
+    User *user;
+    MBProgressHUD *HUD;
 }
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -29,11 +33,11 @@
 {
     [super viewDidLoad];
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    HUD = [MBProgressHUD new];
+    [self.view addSubview:HUD];
+    
+    user = [User sharedUser];
+    self.nameText.text = user.email;
 }
 
 - (void)didReceiveMemoryWarning
@@ -54,12 +58,13 @@
 
 #pragma mark - Action method
 
-- (IBAction)cancelAction:(id)sender {
-    [self.delegate loginViewControllerDidCancel:self];
-}
-
 - (IBAction)loginAction:(id)sender {
-    [self.delegate loginViewControllerDidSave:self];
+    if (self.nameText.text.length != 0 && self.passwordText.text.length != 0) {
+        [self loginWithName:self.nameText.text password:self.passwordText.text];
+    }else{
+        UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"登入失败" message:@"请输入邮件和密码" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+        [alert show];
+    }
 }
 
 - (IBAction)TextField_DidEndOnExit:(UITextField *)sender{
@@ -69,6 +74,55 @@
         [self.passwordText resignFirstResponder];
         [self.loginButton sendActionsForControlEvents:UIControlEventTouchUpInside];
     }
+}
+
+#pragma mark - Login method
+-(void)loginWithName:(NSString *)name password:(NSString *)password{
+    
+    HUD.mode = MBProgressHUDModeIndeterminate;
+    HUD.labelText = NSLocalizedString(@"登入中", nil);
+    [HUD show:YES];
+    
+    NSString *url=@"http://www.douban.com/j/app/login";
+    AFHTTPSessionManager *manager=[AFHTTPSessionManager manager];
+    NSMutableDictionary *loginParameters=[NSMutableDictionary dictionaryWithObjectsAndKeys:@"radio_desktop_win",@"app_name",
+                                          @"100",@"version",name,@"email",password,@"password",nil];
+    
+    [manager POST:url parameters:loginParameters success:^(NSURLSessionDataTask *task, id responseObject) {
+        NSDictionary *loginMess=(NSDictionary *)responseObject;
+        [HUD hide:YES];
+        if ( [[[loginMess objectForKey:@"r"] stringValue] isEqualToString:@"0"] ) {
+            //登陆成功
+            
+            user.isLogin = YES;
+            user.email = name;
+            user.password = password;
+            
+            user.user_id = [loginMess objectForKey:@"user_id"];
+            user.expire = [loginMess objectForKey:@"expire"];
+            user.token = [loginMess objectForKey:@"token"];
+            user.user_name = [loginMess objectForKey:@"user_name"];
+            [user save];
+            
+            [self.navigationItem setTitle:user.user_name];
+            
+            [self.navigationController popViewControllerAnimated:YES];
+            NSLog(@"login success");
+            
+        }else if ( [[[loginMess objectForKey:@"r"] stringValue] isEqualToString:@"1"] ){
+            //登陆失败
+            user.isLogin = NO;
+            
+            UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"登入失败" message:[NSString stringWithFormat:@"%@",[loginMess objectForKey:@"err"]] delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+            [alert show];
+            NSLog(@"login failure");
+        }
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        //网络连接失败
+        user.isLogin = NO;
+        [HUD hide:YES];
+        NSLog(@"[getLogin]Network connect failure:error--->%@",error);
+    }];
 }
 
 @end

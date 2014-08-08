@@ -19,7 +19,7 @@
 #import "UIViewController+JASidePanel.h"
 #import <MediaPlayer/MPNowPlayingInfoCenter.h>
 #import <MediaPlayer/MPMediaItem.h>
-
+#import "MBProgressHUD.h"
 @interface FMViewController ()
 
 @end
@@ -99,7 +99,7 @@
     
     //重新登陆
     if (user.email.length != 0 && user.password.length != 0) {
-        [self loginName:user.email password:user.password];
+        [self loginWithName:user.email password:user.password];
     }
     
     //频道列表
@@ -254,7 +254,7 @@
 }
 
 #pragma mark - Login method
--(void)loginName:(NSString *)name password:(NSString *)password{
+-(void)loginWithName:(NSString *)name password:(NSString *)password{
     
     NSString *url=@"http://www.douban.com/j/app/login";
     AFHTTPSessionManager *manager=[AFHTTPSessionManager manager];
@@ -294,21 +294,6 @@
         user.isLogin = NO;
         NSLog(@"[getLogin]Network connect failure:error--->%@",error);
     }];
-}
-
-#pragma mark - LoginViewControllerDelegate method
-
--(void)loginViewControllerDidCancel:(LoginViewController *)controller{
-    [self.navigationController popViewControllerAnimated:YES];
-}
-
--(void)loginViewControllerDidSave:(LoginViewController *)controller{
-    if (controller.nameText.text.length != 0 && controller.passwordText.text.length != 0) {
-        [self loginName:controller.nameText.text password:controller.passwordText.text];
-    }else{
-        UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"登入失败" message:@"请输入邮件和密码" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-        [alert show];
-    }
 }
 
 #pragma mark - KVO delegate method
@@ -468,10 +453,7 @@
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
     ChannelsViewController *viewController=(ChannelsViewController *)segue.destinationViewController;
     
-    if ([viewController isKindOfClass:[LoginViewController class]]) {
-        LoginViewController *loginvc=(LoginViewController *)viewController;
-        loginvc.delegate=self;
-    }else if ([viewController isKindOfClass:[ChannelsViewController class]]){
+    if ([viewController isKindOfClass:[ChannelsViewController class]]){
         ChannelsViewController *chvc=(ChannelsViewController *)viewController;
         chvc.channels=channels;
         [chvc.tableView reloadData];
