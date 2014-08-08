@@ -311,7 +311,7 @@
 
 -(void)progressChange{
     if (streamer.duration == 0.0) {
-        [self.progress setProgress:0.0f animated:YES];
+        [self.progress setProgress:0.0f animated:NO];
     }else{
         [self.progress setProgress:[streamer currentTime] / [streamer duration] animated:YES];
     }
