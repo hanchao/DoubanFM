@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "LoginViewController.h"
 #import "ChannelsViewController.h"
-#import "EFCircularSlider.h"
+#import "DACircularProgressView.h"
 #import "DOUAudioVisualizer.h"
 
 @interface FMViewController : UIViewController<LoginViewControllerDelegate,ChannelsViewControllerDelegate>
@@ -18,7 +18,7 @@
 @property (strong, nonatomic) IBOutlet UIImageView *imageView;
 @property (strong, nonatomic) IBOutlet DOUAudioVisualizer *audioVisualizerView;
 @property (strong, nonatomic) IBOutlet UILabel *songTitle;
-@property (strong, nonatomic) IBOutlet EFCircularSlider *progress;
+@property (strong, nonatomic) IBOutlet DACircularProgressView *progress;
 @property (strong, nonatomic) IBOutlet UIButton *playing;
 @property (strong, nonatomic) IBOutlet UIButton *love;
 @property (strong, nonatomic) IBOutlet UIButton *trash;

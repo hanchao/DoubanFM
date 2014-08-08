@@ -132,7 +132,7 @@
                                     <action selector="loveAction:" destination="EjG-T8-T9B" eventType="touchUpInside" id="bhG-PQ-IUR"/>
                                 </connections>
                             </button>
-                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="N3W-Ua-kMC" customClass="EFCircularSlider">
+                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="N3W-Ua-kMC" customClass="DACircularProgressView">
                                 <rect key="frame" x="35" y="115" width="250" height="250"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>

@@ -67,19 +67,15 @@
  
     tracks=[NSMutableArray array];
     
-    self.progress.currentValue = 0.0f;
-    self.progress.minimumValue = 0.0f;
-    self.progress.maximumValue = 1.0f;
-    self.progress.unfilledColor = [UIColor colorWithRed:0.884f green:0.867f blue:0.839f alpha:1];
-    self.progress.filledColor = [UIColor colorWithRed:0.584f green:0.967f blue:0.739f alpha:1];
-    self.progress.handleColor = self.progress.filledColor;
-    self.progress.handleType = EFSemiTransparentWhiteCircle;
-    self.progress.enabled = NO;
+    self.progress.trackTintColor = [UIColor colorWithRed:0.884f green:0.867f blue:0.839f alpha:0.3f];
+    self.progress.progressTintColor = [UIColor colorWithRed:0.584f green:0.967f blue:0.739f alpha:1.0f];
+    self.progress.thicknessRatio = 0.03f;
+    self.progress.roundedCorners = YES;
     
     //设置音乐进度条
-    [NSTimer scheduledTimerWithTimeInterval:0.5f target:self selector:@selector(setSliderValue) userInfo:nil repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(progressChange) userInfo:nil repeats:YES];
     
-    self.songTitle.text = @"加载中...";
+    self.songTitle.text = @"";
     [self.songTitle setNumberOfLines:0];
     self.songTitle.lineBreakMode = UILineBreakModeWordWrap;
     
@@ -182,7 +178,7 @@
     [tracks removeObject:currentTrack];
     streamer=[DOUAudioStreamer streamerWithAudioFile:currentTrack];
     [streamer addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
-    [self setSliderValue];
+    [self progressChange];
     NSString *title=[NSString stringWithFormat:@"%@\n%@",currentTrack.title,currentTrack.artist];
     [self.songTitle setText:title];
     self.love.selected = currentTrack.isLike;
@@ -328,11 +324,11 @@
     }
 }
 
--(void)setSliderValue{
+-(void)progressChange{
     if (streamer.duration == 0.0) {
-        self.progress.currentValue = 0.0f;
+        [self.progress setProgress:0.0f animated:YES];
     }else{
-        self.progress.currentValue = [streamer currentTime] / [streamer duration];
+        [self.progress setProgress:[streamer currentTime] / [streamer duration] animated:YES];
     }
     [self configNowPlayingInfoCenter];
 }
