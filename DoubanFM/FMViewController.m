@@ -106,8 +106,8 @@
     //频道列表
     [self getChannels];
     
-//    [[AVAudioSession sharedInstance] setActive:YES error:nil];
-//    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+    [[AVAudioSession sharedInstance] setActive:YES error:nil];
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     
     // 处理打断消息
     [[NSNotificationCenter defaultCenter] addObserver: self
