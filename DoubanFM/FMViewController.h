@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AVFoundation/AVFoundation.h>
 #import "LoginViewController.h"
 #import "ChannelsViewController.h"
 #import "DACircularProgressView.h"
@@ -34,7 +35,5 @@
 - (IBAction)nextAction:(id)sender;
 - (IBAction)loveAction:(id)sender;
 - (IBAction)trashAction:(id)sender;
-
-- (NSURL *)applicationDocumentsDirectory;
 
 @end

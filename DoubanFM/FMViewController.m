@@ -20,6 +20,7 @@
 #import <MediaPlayer/MPNowPlayingInfoCenter.h>
 #import <MediaPlayer/MPMediaItem.h>
 #import "MBProgressHUD.h"
+
 @interface FMViewController ()
 
 @end
@@ -77,7 +78,7 @@
     
     self.songTitle.text = @"";
     [self.songTitle setNumberOfLines:0];
-    self.songTitle.lineBreakMode = UILineBreakModeWordWrap;
+    self.songTitle.lineBreakMode = NSLineBreakByWordWrapping;
     
     self.playing.hidden = YES;
     
@@ -104,6 +105,15 @@
     
     //频道列表
     [self getChannels];
+    
+//    [[AVAudioSession sharedInstance] setActive:YES error:nil];
+//    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+    
+    // 处理打断消息
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector:    @selector(handleInterruption:)
+                                                 name:        AVAudioSessionInterruptionNotification
+                                               object:      [AVAudioSession sharedInstance]];
     
     //自动播放
     [self next];
@@ -503,5 +513,11 @@
         }
     }
 }
+
+- (IBAction)handleInterruption:(id)sender {
+    //停止播放的事件
+    [self playOrPause];
+}
+
 
 @end

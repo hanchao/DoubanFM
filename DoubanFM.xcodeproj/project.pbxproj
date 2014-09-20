@@ -42,6 +42,7 @@
 		D6737AE0198A5A6000B9E94B /* login@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6737ADC198A5A6000B9E94B /* login@2x.png */; };
 		D6737AE1198A5A6000B9E94B /* menu.png in Resources */ = {isa = PBXBuildFile; fileRef = D6737ADD198A5A6000B9E94B /* menu.png */; };
 		D6737AE2198A5A6000B9E94B /* menu@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6737ADE198A5A6000B9E94B /* menu@2x.png */; };
+		D6CA701E19CDBDE900D4A7BE /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6CA701C19CDBC5100D4A7BE /* AVFoundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +104,7 @@
 		D6737ADC198A5A6000B9E94B /* login@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "login@2x.png"; sourceTree = "<group>"; };
 		D6737ADD198A5A6000B9E94B /* menu.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = menu.png; sourceTree = "<group>"; };
 		D6737ADE198A5A6000B9E94B /* menu@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "menu@2x.png"; sourceTree = "<group>"; };
+		D6CA701C19CDBC5100D4A7BE /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +112,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6CA701E19CDBDE900D4A7BE /* AVFoundation.framework in Frameworks */,
 				D6737A301989E0BD00B9E94B /* CoreGraphics.framework in Frameworks */,
 				D6737A321989E0BD00B9E94B /* UIKit.framework in Frameworks */,
 				D6737A2E1989E0BD00B9E94B /* Foundation.framework in Frameworks */,
@@ -153,6 +156,7 @@
 		D6737A2C1989E0BD00B9E94B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D6CA701C19CDBC5100D4A7BE /* AVFoundation.framework */,
 				D6737A2D1989E0BD00B9E94B /* Foundation.framework */,
 				D6737A2F1989E0BD00B9E94B /* CoreGraphics.framework */,
 				D6737A311989E0BD00B9E94B /* UIKit.framework */,
